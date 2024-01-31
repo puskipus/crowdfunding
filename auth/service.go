@@ -34,7 +34,7 @@ func (s *jwtService) GenerateToken(userID int) (string, error) {
 	return signedToken, nil
 }
 
-func (s *jwtService) ValidateTokenToken(encodedToken string) (*jwt.Token, error) {
+func (s *jwtService) ValidateToken(encodedToken string) (*jwt.Token, error) {
 	token, err := jwt.Parse(encodedToken, func(t *jwt.Token) (interface{}, error) {
 		_, ok := t.Method.(*jwt.SigningMethodHMAC)
 
