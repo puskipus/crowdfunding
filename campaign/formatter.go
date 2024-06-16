@@ -1,6 +1,8 @@
 package campaign
 
-import "strings"
+import (
+	"strings"
+)
 
 type CampaignFormatter struct {
 	ID               int    `json:"id"`
@@ -14,28 +16,25 @@ type CampaignFormatter struct {
 }
 
 func FormatCampaign(campaign Campaign) CampaignFormatter {
-	campaignFormatter := CampaignFormatter{
-		ID:               campaign.ID,
-		UserID:           campaign.UserID,
-		Name:             campaign.Name,
-		ShortDescription: campaign.ShortDescription,
-		GoalAmount:       campaign.GoalAmount,
-		CurrentAmount:    campaign.CurrentAmount,
-		Slug:             campaign.Slug,
-		ImageURL:         "",
-	}
+	campaignFormatter := CampaignFormatter{}
+	campaignFormatter.ID = campaign.ID
+	campaignFormatter.UserID = campaign.UserID
+	campaignFormatter.Name = campaign.Name
+	campaignFormatter.ShortDescription = campaign.ShortDescription
+	campaignFormatter.GoalAmount = campaign.GoalAmount
+	campaignFormatter.CurrentAmount = campaign.CurrentAmount
+	campaignFormatter.Slug = campaign.Slug
+	campaignFormatter.ImageURL = ""
 
-	if len(campaign.CampaignImages) > 0 {
-		campaignFormatter.ImageURL = campaign.CampaignImages[0].FileName
+	if len(campaign.CampaignImage) > 0 {
+		campaignFormatter.ImageURL = campaign.CampaignImage[0].FileName
 	}
 
 	return campaignFormatter
 }
 
 func FormatCampaigns(campaigns []Campaign) []CampaignFormatter {
-
 	campaignsFormatter := []CampaignFormatter{}
-
 	for _, campaign := range campaigns {
 		campaignFormatter := FormatCampaign(campaign)
 		campaignsFormatter = append(campaignsFormatter, campaignFormatter)
@@ -52,6 +51,7 @@ type CampaignDetailFormatter struct {
 	ImageURL         string                   `json:"image_url"`
 	GoalAmount       int                      `json:"goal_amount"`
 	CurrentAmount    int                      `json:"current_amount"`
+	BackerCount      int                      `json:"backer_count"`
 	UserID           int                      `json:"user_id"`
 	Slug             string                   `json:"slug"`
 	Perks            []string                 `json:"perks"`
@@ -61,29 +61,32 @@ type CampaignDetailFormatter struct {
 
 type CampaignUserFormatter struct {
 	Name     string `json:"name"`
-	ImageURL string `json:"image_url"`
+	ImageUrl string `json:"image_url"`
 }
 
 type CampaignImageFormatter struct {
-	ImageURL  string `json:"image_url"`
+	ImageUrl  string `json:"image_url"`
 	IsPrimary bool   `json:"is_primary"`
 }
 
-func FormatCampaignDetail(campaign Campaign) CampaignDetailFormatter {
-	campaignDetailFormatter := CampaignDetailFormatter{
-		ID:               campaign.ID,
-		Name:             campaign.Name,
-		ShortDescription: campaign.ShortDescription,
-		Description:      campaign.Description,
-		GoalAmount:       campaign.GoalAmount,
-		CurrentAmount:    campaign.CurrentAmount,
-		UserID:           campaign.UserID,
-		Slug:             campaign.Slug,
-		ImageURL:         "",
-	}
+func FormatDetailCampaign(campaign Campaign) CampaignDetailFormatter {
+	campaignDetailFormatter := CampaignDetailFormatter{}
+	campaignUserFormatter := CampaignUserFormatter{}
 
-	if len(campaign.CampaignImages) > 0 {
-		campaignDetailFormatter.ImageURL = campaign.CampaignImages[0].FileName
+	campaignDetailFormatter.ID = campaign.ID
+	campaignDetailFormatter.Name = campaign.Name
+	campaignDetailFormatter.ShortDescription = campaign.ShortDescription
+	campaignDetailFormatter.Description = campaign.Description
+	campaignDetailFormatter.GoalAmount = campaign.GoalAmount
+	campaignDetailFormatter.CurrentAmount = campaign.CurrentAmount
+	campaignDetailFormatter.UserID = campaign.UserID
+	campaignDetailFormatter.Slug = campaign.Slug
+	campaignDetailFormatter.BackerCount = campaign.BackerCount
+
+	campaignDetailFormatter.ImageURL = ""
+
+	if len(campaign.CampaignImage) > 0 {
+		campaignDetailFormatter.ImageURL = campaign.CampaignImage[0].FileName
 	}
 
 	var perks []string
@@ -91,33 +94,25 @@ func FormatCampaignDetail(campaign Campaign) CampaignDetailFormatter {
 	for _, perk := range strings.Split(campaign.Perks, ",") {
 		perks = append(perks, strings.TrimSpace(perk))
 	}
-
 	campaignDetailFormatter.Perks = perks
 
-	user := campaign.User
-
-	campaignUserFormatter := CampaignUserFormatter{}
-	campaignUserFormatter.Name = user.Name
-	campaignUserFormatter.ImageURL = user.AvatarFileName
-
+	campaignUserFormatter.Name = campaign.User.Name
+	campaignUserFormatter.ImageUrl = campaign.User.AvatarFileName
 	campaignDetailFormatter.User = campaignUserFormatter
 
 	images := []CampaignImageFormatter{}
-
-	for _, image := range campaign.CampaignImages {
+	for _, image := range campaign.CampaignImage {
 		campaignImageFormatter := CampaignImageFormatter{}
-		campaignImageFormatter.ImageURL = image.FileName
+		campaignImageFormatter.ImageUrl = image.FileName
 
-		isPrimary := false
-		if image.IsPrimary == 1 {
-			isPrimary = true
+		campaignImageFormatter.IsPrimary = false
+		if image.IsPrimary > 0 {
+			campaignImageFormatter.IsPrimary = true
 		}
-		campaignImageFormatter.IsPrimary = isPrimary
 
 		images = append(images, campaignImageFormatter)
 	}
 
 	campaignDetailFormatter.Images = images
-
 	return campaignDetailFormatter
 }
